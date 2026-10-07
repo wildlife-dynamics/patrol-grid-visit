@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting — Patrol Grid Visit Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">Patrol Grid Visit Workflow</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html" class="active">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Troubleshooting</h1>
+    <p class="lede">Common issues encountered while configuring, running, or contributing to the Patrol Grid Visit Workflow, and how to resolve them. If your issue isn't listed here, open an issue on <a href="https://github.com/wildlife-dynamics/patrol-grid-visit/issues">GitHub</a>.</p>
+
+    <h2>Configuration &amp; Connections</h2>
+
+    <div class="error-block">
+      <p class="symptom"><code>No data returned from EarthRanger for get_patrol_observations_with_patrol_filter</code></p>
+      <p>No completed patrols with tracks matched your settings. Check that:</p>
+      <ul>
+        <li>The <a href="user-guide.html#time-range">Time Range</a> covers a period when patrols were recorded.</li>
+        <li>The patrols are marked <strong>done</strong> in EarthRanger. Active, scheduled, and cancelled patrols are not fetched.</li>
+        <li>Each <a href="user-guide.html#patrol-types">Patrol Types</a> value exactly matches a patrol type value in EarthRanger. Leave the field empty to include every type.</li>
+      </ul>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">EarthRanger connection fails or times out</p>
+      <p>Verify the server URL and credentials configured in the EarthRanger connection (see <a href="user-guide.html#connections">Data Source Connection</a>). Confirm you can log into that same EarthRanger instance in a browser with the same account, and that the account has permission to view patrols.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Basemap tiles don't load, or the background map is blank</p>
+      <p>The <a href="user-guide.html#basemap">Base Map Layers</a> are user-editable. If you changed them away from the ArcGIS defaults, confirm each tile URL follows the standard <code>{z}/{y}/{x}</code> template and is reachable from the machine running the workflow.</p>
+    </div>
+
+    <h2>Map Outputs</h2>
+
+    <div class="error-block">
+      <p class="symptom">The map is empty or very sparse, even though patrols exist</p>
+      <p>The default <a href="user-guide.html#trajectory-filter">Segment Filter</a> is permissive and keeps almost every segment, so check whether it has been tightened. Limits such as max 9&nbsp;km/h or 5&nbsp;km per segment suit foot patrols but discard most vehicle, motorbike, or aerial patrol segments. Patrol tracks with only one GPS fix cannot form a segment and are always excluded.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Straight lines of visited cells cut across areas nobody patrolled</p>
+      <p>These come from GPS gaps. When a device loses signal or is switched off, the segment joining the fixes on either side of the gap is a straight line, and every cell it crosses is credited with a visit. The default <a href="user-guide.html#trajectory-filter">Segment Filter</a> keeps segments up to 100&nbsp;km and 48&nbsp;hours long. Lower <strong>Max Length Meters</strong> and <strong>Max Time Secs</strong> (e.g. <code>5000</code> and <code>21600</code> for foot patrols) to drop them.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Almost every cell is in the lowest color bin</p>
+      <p>The 5 bins are equal-width ranges between the least- and most-visited cells. One or two very busy cells (for example next to a ranger post or along a main road) stretch the range so that everything else falls into the first bin. A larger <a href="user-guide.html#grid">Grid Cell Size</a> can smooth this out. To change the classification scheme (e.g. to <code>quantile</code> or <code>natural_breaks</code>), edit <code>classification_options</code> in <code>spec.yaml</code> and recompile.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">The grid looks too blocky, or too fine to read</p>
+      <p>Adjust <a href="user-guide.html#grid">Grid Cell Size</a>. The default 1000 gives roughly 1&nbsp;km cells near the equator. The grid is built in Web Mercator (EPSG:3857), so cells cover slightly less ground the further you are from the equator (about 6&nbsp;% smaller at 20&deg;).</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>ValueError: Missing required columns: ['patrol_id'] ...</code></p>
+      <p>The coverage grid needs a <code>patrol_id</code> column on every trajectory segment. It is produced by the <strong>Map Columns</strong> step, which renames <code>extra__patrol_id</code> to <code>patrol_id</code>. If you edited <code>spec.yaml</code>, make sure <code>patrol_id</code> is still listed in <code>relocs_columns</code> under <strong>Process Relocations</strong> and that the rename is still in place.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">No outputs written / can't find results</p>
+      <p>All outputs are written to the directory specified by the <code>ECOSCOPE_WORKFLOWS_RESULTS</code> environment variable. Confirm it's set and points to a directory the workflow process can write to.</p>
+    </div>
+
+    <h2>Contributing &amp; CI</h2>
+    <p>These apply if you're modifying the workflow itself (<code>spec.yaml</code> or the generated <code>ecoscope-workflows-patrol-grid-visit-workflow/</code> directory) and opening a pull request.</p>
+
+    <div class="error-block">
+      <p class="symptom"><code>Compiled artifact 'params.json' is not a valid JSON Schema: 'ecoscope.platform.annotations.DataFrame' is not valid under any of the given schemas</code></p>
+      <p>A task in <code>spec.yaml</code> has a DataFrame/GeoDataFrame parameter that isn't set in its <code>partial</code> block, so the compiler tries to expose it as a form field, which isn't possible. The error's <code>path</code> names the task and parameter (e.g. <code>reloc_coord_filter &rarr; roi_gdf</code>). Set that parameter in <code>partial</code>, either to <code>null</code> or to an upstream result such as <code>${{ workflow.&lt;id&gt;.return }}</code>, and recompile. This often appears after a package upgrade adds a new optional parameter to an existing task.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>ValidationError: ... label_options.DefaultLabels.label_prefix  Input should be a valid string [... input_value=None ...]</code></p>
+      <p>The compiler writes <code>None</code> for any <code>label_options</code> field the spec leaves out, and <code>apply_classification</code> rejects it. Set every label field explicitly under the <strong>Apply Classification</strong> task:</p>
+      <pre><code>label_options:
+  label_prefix: ""
+  label_suffix: ""
+  label_ranges: true
+  label_decimals: 0</code></pre>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>Generated files differ from committed files in ecoscope-workflows-patrol-grid-visit-workflow</code></p>
+      <p>The generated workflow directory is out of sync with <code>spec.yaml</code>. Run the recompile script locally and commit the result:</p>
+      <pre><code>pixi run --manifest-path pixi.toml --locked bash -c "./dev/recompile.sh --update"</code></pre>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>Found wildcard version (*) in requirements</code> or <code>Found local file channel (file://) in requirements</code></p>
+      <p>In <code>spec.yaml</code>, every dependency under <code>requirements</code> must pin a version and use a remote conda channel. Wildcard versions and local <code>file://</code> channels are only valid for local development.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>VERSION.yaml (...) must be greater than main branch (...)</code></p>
+      <p>Bump <code>MAJ</code>/<code>MIN</code>/<code>PATCH</code> in <code>ecoscope-workflows-patrol-grid-visit-workflow/VERSION.yaml</code> so it's strictly greater than the version on <code>main</code> before opening or updating a PR.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>test-cases.yaml must contain at least one test case</code></p>
+      <p>Every workflow requires a <code>test-cases.yaml</code> at the repository root with at least one top-level entry containing a <code>params</code> block. Use the settings from a successful run as the starting point.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Patrol Grid Visit Workflow &middot; <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">wildlife-dynamics/patrol-grid-visit</a> on GitHub</p>
+  </footer>
+</body>
+</html>

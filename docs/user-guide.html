@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide — Patrol Grid Visit Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">Patrol Grid Visit Workflow</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html" class="active">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Patrol Grid Visit Workflow &mdash; User Guide</h1>
+    <p class="lede">This guide walks you through loading, configuring, and running the Patrol Grid Visit Workflow, which maps how many distinct ranger patrols visited each cell of a grid laid over your patrolled area.</p>
+
+    <h2>What it produces</h2>
+    <ul>
+      <li>An interactive map of grid cells colored by the number of distinct patrols that entered them (5 equal-interval bins, red&ndash;yellow&ndash;green)</li>
+      <li>A dashboard containing the map, the workflow details, and the analysis time range</li>
+    </ul>
+
+    <h2>Requirements</h2>
+    <ul>
+      <li>Access to an <strong>EarthRanger</strong> instance with a configured data source</li>
+      <li>Patrols in that instance with status <strong>done</strong> and recorded tracks in the analysis period</li>
+    </ul>
+
+    <hr />
+
+    <h2 id="load">1. Load the Workflow</h2>
+    <p>In the workflow runner, add a new template using this repository's URL:</p>
+    <pre><code>https://github.com/wildlife-dynamics/patrol-grid-visit.git</code></pre>
+    <p>Once added, select <strong>Patrol Grid Visit</strong> from the available templates list to load it.</p>
+
+    <hr />
+
+    <h2 id="configure">2. Configure the Workflow</h2>
+    <p>You'll be prompted to fill in the following parameters before running.</p>
+
+    <h3 id="workflow-details">Workflow Details</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Workflow Name</td><td>A short name to identify this run</td></tr>
+        <tr><td>Workflow Description</td><td>Optional description</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="time-range">Time Range</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>Since</td><td>Start date/time of the analysis period</td><td>&mdash;</td></tr>
+        <tr><td>Until</td><td>End date/time of the analysis period</td><td>&mdash;</td></tr>
+        <tr><td>Timezone</td><td>Timezone used to interpret Since/Until</td><td>&mdash;</td></tr>
+        <tr><td>Time Format</td><td>Format used to display dates in the dashboard</td><td><code>%d %b %Y %H:%M:%S</code></td></tr>
+      </tbody>
+    </table>
+    <p>Any patrol that <strong>overlaps</strong> the range is included, even if it started before <strong>Since</strong> or ended after <strong>Until</strong>.</p>
+
+    <h3 id="connections">Data Source Connection</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Data Source</td><td>Select (or create) the EarthRanger connection to pull patrols from</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="patrol-types">Patrol Observations</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>Patrol Types</td><td>The patrol type value(s) to analyse, as configured in EarthRanger. <strong>Leave empty to include all patrol types</strong></td><td>empty</td></tr>
+      </tbody>
+    </table>
+    <p>Only patrols with status <strong>done</strong> are fetched. If no matching patrol observations are found, the run stops with an error.</p>
+
+    <h3 id="basemap">Base Map Layers</h3>
+    <p>The background tile layers shared by the map. The first layer in the list is drawn at the bottom. URL, opacity, and max zoom are editable.</p>
+    <table>
+      <thead><tr><th>Layer</th><th>Default URL</th><th>Opacity</th><th>Max Zoom</th></tr></thead>
+      <tbody>
+        <tr><td>1 (bottom)</td><td>ArcGIS World Topo Map</td><td><code>1.0</code></td><td><code>20</code></td></tr>
+        <tr><td>2 (top)</td><td>ArcGIS World Imagery</td><td><code>0.5</code></td><td><code>20</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="trajectory-filter">Relocations To Trajectory &mdash; Segment Filter <em>(advanced)</em></h3>
+    <p>Removes GPS noise and unrealistic movements when patrol track points are joined into segments.</p>
+    <table>
+      <thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Min Length Meters</td><td><code>0.001</code></td><td>Discard segments shorter than this distance</td></tr>
+        <tr><td>Max Length Meters</td><td><code>100000</code></td><td>Discard segments longer than this distance (100 km)</td></tr>
+        <tr><td>Min Time Secs</td><td><code>1</code></td><td>Discard segments shorter than this duration</td></tr>
+        <tr><td>Max Time Secs</td><td><code>172800</code></td><td>Discard segments longer than this duration (48 hours)</td></tr>
+        <tr><td>Min Speed Kmhr</td><td><code>0.01</code></td><td>Discard segments below this average speed</td></tr>
+        <tr><td>Max Speed Kmhr</td><td><code>500</code></td><td>Discard segments above this average speed</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><strong>Note:</strong> The defaults are permissive so that foot, vehicle, motorbike, and aerial patrols are all kept. The trade-off is that long straight lines across GPS gaps are kept too, and every cell they cross is counted as visited. For foot patrols, tighter limits (e.g. max <code>5000</code>&nbsp;m, <code>21600</code>&nbsp;s, <code>9</code>&nbsp;km/h) give a more faithful map.</p>
+
+    <h3 id="grid">Patrol Coverage Grid</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Grid Cell Size</td><td><code>1000</code></td><td>Edge length of each square grid cell, in meters. Smaller cells give a finer map but each cell gets fewer visits</td></tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h2 id="run">3. Run the Workflow</h2>
+    <p>Once all parameters are configured, submit the workflow. The runner will:</p>
+    <ol>
+      <li>Fetch the tracks of completed patrols from EarthRanger for the selected patrol types and time range.</li>
+      <li>Join the track points into trajectory segments, dropping segments outside the segment filter limits.</li>
+      <li>Build a square grid over the patrolled area and count the distinct patrols that entered each cell.</li>
+      <li>Classify the counts into 5 equal-interval bins and color them red&ndash;yellow&ndash;green.</li>
+      <li>Draw the interactive map and dashboard, and save outputs to the directory specified by <code>ECOSCOPE_WORKFLOWS_RESULTS</code>.</li>
+    </ol>
+
+    <h3 id="outputs">Output Files</h3>
+    <p>All outputs are written to <code>$ECOSCOPE_WORKFLOWS_RESULTS/</code>:</p>
+    <table>
+      <thead><tr><th>File</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>patrol_grid_visits.html</code></td><td>Interactive patrol grid visits map</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="reading-the-map">Reading the map</h3>
+    <ul>
+      <li>Each cell's color shows how many <em>different</em> patrols entered it. A patrol that loops through a cell several times still counts once.</li>
+      <li>Only cells that at least one patrol entered are drawn. Blank areas were not patrolled in the period, or their tracks were removed by the segment filter.</li>
+      <li>Straight lines of low-visit cells running across otherwise empty areas usually come from a GPS gap: the segment joining the fixes on either side of the gap was kept by the filter. Tighten the segment filter to remove them.</li>
+      <li>Bins are equal-width ranges between the least- and most-visited cells, so one very busy cell (e.g. next to a ranger post) can push most other cells into the lowest bin.</li>
+    </ul>
+  </main>
+
+  <footer class="site-footer">
+    <p>Patrol Grid Visit Workflow &middot; <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">wildlife-dynamics/patrol-grid-visit</a> on GitHub</p>
+  </footer>
+</body>
+</html>

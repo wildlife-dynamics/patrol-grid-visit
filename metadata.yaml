@@ -1,21 +1,10 @@
-name:  # Title Case, e.g. "My Ecoscope Workflow Template"
-
-# at least one author is required
+name: Patrol Grid Visit
 author:
-  - name: ""
-    organization: ""
-    email: ""
+  - name: Tevin Temu
+    organization: Wildlife Dynamics
+    email: tevin@wildlifedynamics.com
 
-description: # A short description
-
-# todo: add example
-theory: "" # optional
-
-# todo: add example
-output_comment: "" # optional
-
-# optional
-# example
-# citation: 
-#   - Wu, Y. et al. (2025). "Monitoring elephant spatial patterns with Ecoscope workflows."
-citation: [] 
+description: Maps how often each part of a landscape is visited by ranger patrols, counting the number of distinct completed EarthRanger patrols that passed through each cell of a square grid.
+theory: "Track points from completed (done) EarthRanger patrols that overlap the analysis period are converted to trajectory segments, with segments outside configurable length, duration, and speed limits dropped (by default only extreme outliers: longer than 100 km or 48 hours, or faster than 500 km/h). A square grid (1000 m cells by default, built in Web Mercator) is laid over the trajectories, segments are clipped to each cell, and the number of distinct patrols entering each cell is counted, along with time spent and distance patrolled, with time allocated in proportion to the length of each segment inside the cell. Visit counts are classified into five equal-interval bins."
+output_comment: "Outputs a dashboard with a single map of patrolled grid cells colored by the number of distinct patrols that visited them (five equal-interval bins on a red-yellow-green scale) over topographic and satellite base maps. Also writes the map as HTML (patrol_grid_visits.html)."
+citation: []

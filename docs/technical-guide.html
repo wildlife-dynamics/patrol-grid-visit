@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Guide — Patrol Grid Visit Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">Patrol Grid Visit Workflow</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html" class="active">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Technical Guide</h1>
+    <p class="lede">How the Patrol Grid Visit Workflow is built: the data ingestion pipeline, how the coverage grid and per-cell metrics are calculated, and how the map and dashboard are assembled.</p>
+
+    <p>
+      <a href="assets/patrol_grid_visit_technical_guide.pdf">Download the full Technical Guide (PDF)</a>
+      <span class="badge">v1.1</span>
+    </p>
+    <p>Version 1.1 documents workflow version 1.0.0. The segment filter is now configured as an advanced field of the <strong>Relocations To Trajectory</strong> step, with the permissive <code>ecoscope-platform</code> defaults (100&nbsp;km, 48&nbsp;h, 500&nbsp;km/h), and the guide adds workflow details and authorship. Version 1.0 documented the workflow on <code>ecoscope-platform</code> 2.18.0 and <code>ecoscope-workflows-ext-mnc</code> 1.0.5.</p>
+
+    <h2>Contents</h2>
+    <ol>
+      <li>Overview</li>
+      <li>Dependencies &amp; Prerequisites
+        <ol type="a">
+          <li>EarthRanger Connection</li>
+          <li>Patrol Selection</li>
+          <li>Base Map Tile Layers</li>
+        </ol>
+      </li>
+      <li>Data Ingestion Pipeline
+        <ol type="a">
+          <li>Observations &rarr; Relocations</li>
+          <li>Trajectory Segment Filter</li>
+          <li>Relocations &rarr; Trajectories</li>
+          <li>Column Mapping</li>
+        </ol>
+      </li>
+      <li>Patrol Coverage Grid &mdash; Methodology
+        <ol type="a">
+          <li>Grid Construction</li>
+          <li>Segment Clipping &amp; Time Allocation</li>
+          <li>Per-Cell Metrics</li>
+          <li>Empty Cells and Area of Interest</li>
+        </ol>
+      </li>
+      <li>Classification &amp; Styling</li>
+      <li>Map &amp; Dashboard</li>
+      <li>Output Files</li>
+      <li>Workflow Execution Logic
+        <ol type="a">
+          <li>Grouping</li>
+          <li>Skip Conditions</li>
+        </ol>
+      </li>
+      <li>Software Versions</li>
+    </ol>
+
+    <h2>Read it here</h2>
+    <p>The guide is embedded below. If it doesn't render in your browser, use the download link above.</p>
+    <embed src="assets/patrol_grid_visit_technical_guide.pdf" type="application/pdf" width="100%" height="900px" style="border: 1px solid #d8e8d8; border-radius: 6px;" />
+  </main>
+
+  <footer class="site-footer">
+    <p>Patrol Grid Visit Workflow &middot; <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">wildlife-dynamics/patrol-grid-visit</a> on GitHub</p>
+  </footer>
+</body>
+</html>

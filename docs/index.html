@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrol Grid Visit Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">Patrol Grid Visit Workflow</a>
+      <nav>
+        <a href="index.html" class="active">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Patrol Grid Visit Workflow</h1>
+    <p class="lede">Maps how often each part of a landscape is visited by ranger patrols. The workflow pulls completed patrol tracks from EarthRanger, lays a square grid over the patrolled area, and counts how many distinct patrols passed through each grid cell.</p>
+
+    <div class="card-grid">
+      <a class="card" href="user-guide.html">
+        <h3>User Guide</h3>
+        <p>Step-by-step instructions for loading, configuring, and running the workflow.</p>
+      </a>
+      <a class="card" href="technical-guide.html">
+        <h3>Technical Guide</h3>
+        <p>How the workflow works internally: data ingestion, grid construction, per-cell metrics, and classification.</p>
+      </a>
+      <a class="card" href="troubleshooting.html">
+        <h3>Troubleshooting</h3>
+        <p>Common errors you may hit while configuring or running the workflow, and how to resolve them.</p>
+      </a>
+    </div>
+
+    <h2>What it produces</h2>
+    <table>
+      <thead><tr><th>Output</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Patrol Grid Visits map</strong></td><td>Grid cells colored by the number of distinct patrols that entered them, classified into 5 equal-interval bins (red&ndash;yellow&ndash;green)</td></tr>
+        <tr><td><strong>Dashboard</strong></td><td>Interactive dashboard containing the map, the workflow details, and the analysis time range</td></tr>
+      </tbody>
+    </table>
+
+    <h2>About</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Version</strong></td><td>1.0.0</td></tr>
+        <tr><td><strong>Author</strong></td><td>Tevin Temu, Wildlife Dynamics (<a href="mailto:tevin@wildlifedynamics.com">tevin@wildlifedynamics.com</a>)</td></tr>
+        <tr><td><strong>Data source</strong></td><td>EarthRanger (completed patrols)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>How it works</h2>
+    <p>Track points from completed (done) EarthRanger patrols that overlap the analysis period are converted to trajectory segments. Segments outside configurable length, duration, and speed limits are dropped; by default only extreme outliers are removed (longer than 100&nbsp;km or 48&nbsp;hours, or faster than 500&nbsp;km/h). A square grid (1000&nbsp;m cells by default, built in Web Mercator) is laid over the trajectories and the segments are clipped to each cell. For each cell, the workflow counts the distinct patrols that entered it and totals the time spent and distance patrolled. Time is allocated in proportion to the length of each segment inside the cell. Visit counts are classified into five equal-interval bins.</p>
+
+    <h2>Requirements</h2>
+    <ul>
+      <li>Access to an <strong>EarthRanger</strong> instance with a configured data source</li>
+      <li>Patrols in that instance with status <strong>done</strong> and recorded tracks in the analysis period</li>
+    </ul>
+
+    <h2>Get started</h2>
+    <p>New to the workflow? Start with the <a href="user-guide.html">User Guide</a> for a walkthrough of adding the template, connecting EarthRanger, and setting parameters. Running into an error? Check <a href="troubleshooting.html">Troubleshooting</a> first.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>Patrol Grid Visit Workflow &middot; <a href="https://github.com/wildlife-dynamics/patrol-grid-visit">wildlife-dynamics/patrol-grid-visit</a> on GitHub</p>
+  </footer>
+</body>
+</html>
